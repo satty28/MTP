@@ -651,7 +651,7 @@ bool checkInterfaceIsActive(char *str) {
 }
 
 // ***  addition by NS
-void sig_handler(int signo);
+void sig_handler(int signo)
 {
 	if (signo == SIGINT){
 	
