@@ -41,7 +41,7 @@ int getActiveInterfaces(char **);
 void learn_active_interfaces();
 bool checkInterfaceIsActive(char *);
 // *** added by NS
-void sig_handler(int signo);
+void sig_handler(int signo); 
 // *** End addition by NS
 
 
@@ -163,7 +163,7 @@ void mtp_start() {
 		exit(1);
 	}
 //** insert by NS	
-	if (signal (SIGINT, sighandler)== SIG_ERR)
+	if (signal (SIGINT, sig_handler)== SIG_ERR)
 		printf("\nCant Catch SIGINT");
 	else exit(1);
 //** End insert by NS
@@ -656,8 +656,10 @@ void sig_handler(int signo);
 	if (signo == SIGINT){
 	
 		printf("received SIGINT\n");
-		exit(1); 
+		
 	}
 }
 // *** End addition by NS
+
+
 
