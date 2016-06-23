@@ -25,6 +25,8 @@
 #include <net/ethernet.h>
 #include <signal.h>
 #include <ctype.h>
+#include <signal.h>
+// NS added this last line to catch and gracefully end on Ctrl C
 
 #include "feature_payload.h"
 #include "mtp_send.h"
@@ -38,6 +40,10 @@ void mtp_start();
 int getActiveInterfaces(char **);
 void learn_active_interfaces();
 bool checkInterfaceIsActive(char *);
+// *** added by NS
+void sig_handler(int signo);
+// *** End addition by NS
+
 
 /* Globals */
 bool isRoot = false;
@@ -60,6 +66,8 @@ int main (int argc, char** argv) {
 		printf("This node is root MTS\n");
 	}
 	else printf("This node is a non-root MTS\n");
+	
+
 
 	// Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
 	interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
@@ -154,6 +162,11 @@ void mtp_start() {
 		perror("Error: MTP socket()");
 		exit(1);
 	}
+//** insert by NS	
+	if (signal (SIGINT, sighandler)== SIG_ERR)
+		printf("\nCant Catch SIGINT");
+	else exit(1);
+//** End insert by NS
 
 	time(&time_advt_beg);
 	while (true) {
@@ -636,3 +649,15 @@ bool checkInterfaceIsActive(char *str) {
 	freeifaddrs(ifaddr);  
 	return false;
 }
+
+// ***  addition by NS
+void sig_handler(int signo);
+{
+	if (signo == SIGINT){
+	
+		printf("received SIGINT\n");
+		exit(1); 
+	}
+}
+// *** End addition by NS
+
