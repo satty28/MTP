@@ -165,7 +165,7 @@ void mtp_start() {
 //** insert by NS	
 	if (signal (SIGINT, sig_handler)== SIG_ERR)
 		printf("\nCant Catch SIGINT");
-	else exit(1);
+	
 //** End insert by NS
 
 	time(&time_advt_beg);
@@ -656,6 +656,7 @@ void sig_handler(int signo)
 	if (signo == SIGINT){
 	
 		printf("received SIGINT\n");
+		exit (1);
 		
 	}
 }
