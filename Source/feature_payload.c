@@ -6,6 +6,7 @@ struct vid_addr_tuple *main_vid_tbl_head = NULL;
 //struct vid_addr_tuple *bkp_vid_tbl_head = NULL; // we can maintain backup paths in Main VID Table only, just a thought
 struct child_pvid_tuple *cpvid_tbl_head = NULL; 
 struct local_bcast_tuple *local_bcast_head = NULL;
+struct Host_Address_tuple *HAT_head = NULL;
 
 /*
  *   isChild() - This method checks if the input VID param is child of any VID in Main 
@@ -872,4 +873,60 @@ bool delete_entry_lbcast_LL(char *port) {
 
 struct local_bcast_tuple* getInstance_lbcast_LL() {
   return local_bcast_head;
+}
+
+/* NS adds code for populating Host Address Table */
+bool add_entry_HAT_LL(struct Host_Address_tuple *HAT) {
+  if (HAT_head == NULL) {
+    HAT_head = HAT;
+  } else {
+    if (!find_entry_HAT_LL(HAT)) {
+      HAT->next = HAT_head;
+      HAT_head = HAT;
+    }
+  } 
+}
+
+bool find_entry_HAT_LL(struct Host_Address_tuple *node) {
+  struct Host_Address_tuple *current = HAT_head;
+
+  if (current != NULL) {
+    while (current != NULL) {
+
+      if (strcmp(current->eth_name, node->eth_name) == 0) {
+        return true;
+      }
+
+      current = current->next;
+    }
+  }
+  return false;
+}
+
+void print_entries_HAT_LL() {
+  struct Host_Address_tuple *current;
+  printf("\n#######Host Address Table#########\n");
+
+  for (current = HAT_head; current != NULL; current = current->next) {
+    printf("%s\n", current->eth_name);
+	printf("%s\t\t\t%d\t\t%s\t\t%d\n", current->eth_name, current->path_cost,  ether_ntoa(&current->mac), current->local );
+  }
+  printf("\n#######End Host Address Table#########\n");
+}
+
+int build_HAAdvt_message(uint8_t *data, struct ether_addr mac, uint8_t cost) {
+	int payloadLen = 1; //to store message type
+	
+	//struct Host_Address_tuple *current = HAT_head;
+	
+		data[payloadLen] = (uint8_t) (cost);
+		payloadLen = payloadLen +1;
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[0];
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[1];
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[2];
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[3];
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[4];
+		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[5];
+		data[0] = MTP_HAAdvt_TYPE; 
+	return payloadLen;
 }
