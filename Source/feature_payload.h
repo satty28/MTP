@@ -40,6 +40,7 @@
 #define NON_PVID_PORT		        2
 
 #define PATH_COST		            0
+#define SEQUENCE_NUMBER         0
 
 #define PERIODIC_HELLO_TIME	    2.0
 #define TRUE                    1
@@ -95,6 +96,7 @@ struct Host_Address_tuple {
   uint8_t path_cost;		// path cost to reach host.
   struct ether_addr mac;   // MAC address of host 
   bool local;  // if the host is local this flag will be set to true - else false
+  uint8_t sequence_number; // 26 Sept 2016
   struct Host_Address_tuple *next;
 };
 
@@ -139,7 +141,8 @@ struct local_bcast_tuple* getInstance_lbcast_LL();
 bool add_entry_HAT_LL(struct Host_Address_tuple *);
 bool find_entry_HAT_LL(struct Host_Address_tuple *);
 void print_entries_HAT_LL();
-int build_HAAdvt_message(uint8_t *, struct ether_addr, uint8_t);
+int build_HAAdvt_message(uint8_t *, struct ether_addr, uint8_t, uint8_t);
+void print_HAAdvt_message_content(uint8_t *);
 
 /* check Failures */
 int checkForFailures(char **);

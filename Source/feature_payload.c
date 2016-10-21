@@ -72,7 +72,7 @@ int  build_VID_ADVT_PAYLOAD(uint8_t *data, char *interface) {
 
   struct vid_addr_tuple *current = main_vid_tbl_head;
 
-  // Port from where VID request came.
+  // Port from where VID advt  came.
   int i;
   for(; interface[i]!='\0'; i++) {
     if(interface[i] >= 48 && interface[i] <= 57) {
@@ -909,18 +909,20 @@ void print_entries_HAT_LL() {
 
   for (current = HAT_head; current != NULL; current = current->next) {
     printf("%s\n", current->eth_name);
-	printf("%s\t\t\t%d\t\t%s\t\t%d\n", current->eth_name, current->path_cost,  ether_ntoa(&current->mac), current->local );
+	printf("%s\t\t\t%d\t\t%d\t\t%s\t\t%d\n", current->eth_name, current->path_cost,  current->sequence_number, ether_ntoa(&current->mac), current->local );
   }
   printf("\n#######End Host Address Table#########\n");
 }
 
-int build_HAAdvt_message(uint8_t *data, struct ether_addr mac, uint8_t cost) {
+int build_HAAdvt_message(uint8_t *data, struct ether_addr mac, uint8_t cost, uint8_t sequence_number) {
 	int payloadLen = 1; //to store message type
 	
 	//struct Host_Address_tuple *current = HAT_head;
 	
 		data[payloadLen] = (uint8_t) (cost);
 		payloadLen = payloadLen +1;
+    data[payloadLen] = (uint8_t) (sequence_number);
+		payloadLen = payloadLen +1; 
 		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[0];
 		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[1];
 		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[2];
@@ -929,4 +931,32 @@ int build_HAAdvt_message(uint8_t *data, struct ether_addr mac, uint8_t cost) {
 		data[payloadLen++] = (uint8_t ) mac.ether_addr_octet[5];
 		data[0] = MTP_HAAdvt_TYPE; 
 	return payloadLen;
+}
+/*
+struct  ether_header {
+  u_char  ether_dhost[6];
+  u_char  ether_shost[6];
+  u_short ether_type;
+};
+struct ether_header *eheader = NULL;
+
+*/
+
+void print_HAAdvt_message_content(uint8_t *rx_buffer)
+{
+  uint8_t mac_addr [6];
+
+  mac_addr[0] = rx_buffer[17];
+  mac_addr[1] = rx_buffer[18];
+  mac_addr[2] = rx_buffer[19];
+  mac_addr[3] = rx_buffer[20];
+  mac_addr[4] = rx_buffer[21];
+  mac_addr[5] = rx_buffer[22];
+
+//uint8_t recv_buffer[MAX_BUFFER_SIZE];
+//recv_buffer[0] = rx_buffer[0];
+//printf("Dest MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_dhost));
+
+printf("\nCost is %d, Sequqnce number is %d, MAC address is %s \n", (uint8_t) rx_buffer[15], (uint8_t) rx_buffer[16], ether_ntoa((struct ether_addr *) mac_addr));
+
 }

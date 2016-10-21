@@ -175,6 +175,7 @@ void mtp_start() {
 		time(&time_advt_fin);
 		// Send Hello Periodic, only if have atleast One VID in Main VID Table.
 		if ((double)(difftime(time_advt_fin, time_advt_beg) >= PERIODIC_HELLO_TIME)) {
+			//printf("Time to send hello message\n");
 			memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
 			int numberOfInterfaces = getActiveInterfaces(interfaceNames); // populates interfaceNames and returns a count
 
@@ -195,6 +196,7 @@ void mtp_start() {
 				int i = 0;
 				for (; i < numberOfInterfaces; ++i) {			
 					ctrlSend(interfaceNames[i], payload, payloadLen);
+					
 				}
 			}
 			free(payload);
@@ -271,7 +273,7 @@ void mtp_start() {
 				// This is an MTP frame so, incase this port is in Local host broadcast table remove it.
 				delete_entry_lbcast_LL(recvOnEtherPort); 
 			}
-
+            // recvBuffer[0] to recvBuffer[13] has 6 bytes dest MAC address, 6 bytes src MAC address, 2 bytes type
 			switch ( recvBuffer[14] ) {
 				case MTP_TYPE_JOIN_MSG:
 					{
@@ -293,7 +295,7 @@ void mtp_start() {
 					break;
 				case MTP_TYPE_PERODIC_MSG:
 					{
-						// printf ("MTP_TYPE_PERODIC_MSG\n");
+						//printf ("MTP_TYPE_PERODIC_MSG\n");
 						// Record MAC ADDRESS, if not already present.
 						struct ether_addr src_mac;
 						bool retMainVID, retCPVID; 
@@ -497,13 +499,44 @@ void mtp_start() {
 					} 
 					break;
 				case MTP_HAAdvt_TYPE: {
-					printf ("Received MTP_TYPE_PERODIC_MSG\n");
-					struct ether_addr src_mac, dst_mac;
+
+					printf ("Received MTP_HAAdvt_TYPE Message \n"); //MTP_HAAdvt_TYPE
+
+					//struct ether_addr src_mac, dst_mac;
+					struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); //27 Sept 2016
+					// all the information in the message is in recvBuffer
+					print_HAAdvt_message_content(recvBuffer); 
+					uint8_t mac_addr [6];
+
+  					mac_addr[0] = recvBuffer[17];
+  					mac_addr[1] = recvBuffer[18];
+  					mac_addr[2] = recvBuffer[19];
+  					mac_addr[3] = recvBuffer[20];
+  					mac_addr[4] = recvBuffer[21];
+  					mac_addr[5] = recvBuffer[22];
+
+					strncpy(HAT->eth_name, recvOnEtherPort, strlen(recvOnEtherPort));	// record the port onwhch the control frame arrived				
+					HAT->path_cost = PATH_COST; // have to fix this - adds
+					HAT->sequence_number ++; // not sure what to do - have to fix
+				
+					memcpy(&HAT->mac, (struct ether_addr *) mac_addr, sizeof(struct ether_addr)); // have to fix. 
+						
+					HAT->local = TRUE;  
+						
+					HAT->next = NULL;
 					
-					memcpy(&src_mac, (struct ether_addr *)&eheader->ether_shost, sizeof(struct ether_addr));
-					memcpy(&dst_mac, (struct ether_addr *)&eheader->ether_dhost, sizeof(struct ether_addr));
-					printf("Dest MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_dhost));
-					printf("Source MAC: %s\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
+					//memcpy(&src_mac, (struct ether_addr *)&eheader->ether_shost, sizeof(struct ether_addr)); // why are we doing this?
+					//memcpy(&dst_mac, (struct ether_addr *)&eheader->ether_dhost, sizeof(struct ether_addr));
+					//printf("Dest MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_dhost));
+					//printf("Source MAC: %s\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
+					
+					if (add_entry_HAT_LL (HAT)) {
+							//printf("Source MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
+							//printf("********** End Host Address Table after receiving a message ***********\n\n");
+						
+							//print_entries_HAT_LL();
+						
+						}
 					// Update Host Address Table 
 					// if changed - send another update 
 				}
@@ -573,26 +606,35 @@ void mtp_start() {
 				//print_entries_cpvid_LL();
 			} 
 			// NS added the following to collect data on host MAC address and ports
+			else if (strncmp(ether_ntoa((struct ether_addr *)&eheader->ether_dhost), "01:00:5e:00:00:01", 9) == 0)
+			{
+				//multicast address range is from 01:00:5e:00:00:00 to 01:00:5e:7f:ff:ff
+				printf("Received on port %s a multicast frame \n", recvOnEtherPort); 
+				printf("Destination MAC: %s\n", ether_ntoa((struct ether_addr *)&eheader->ether_dhost));
+				break; 
+
+			}
+
 			else {
 				
-				printf("Received a non-Bcast frame\n");
-				/*
+				printf("\n\nReceived a non-Bcast frame\n");
 				printf("Source MAC: %s\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
 				printf("Destination MAC: %s\n", ether_ntoa((struct ether_addr *)&eheader->ether_dhost));
 				printf("Message Type: %x\n", ntohs(eheader->ether_type));
 				printf("Received on port %s\n", recvOnEtherPort); 
-				*/
+				
 				struct local_bcast_tuple* current =  getInstance_lbcast_LL(); 
 				
 				for (; current != NULL; current = current->next) {
 					// this a port from where the frame was received
 					struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); 
-					//struct child_pvid_tuple *new_cpvid = (struct child_pvid_tuple*) calloc (1, sizeof(struct child_pvid_tuple));
+					
 					if (strcmp(current->eth_name, recvOnEtherPort) == 0) {
 						//printf("********** Host Address Table Data ***********\n");
-						printf("Frame from host came on port %s\n", current->eth_name);
+						//printf("Frame from host came on port %s\n", current->eth_name);
 						strncpy(HAT->eth_name, current->eth_name, strlen(current->eth_name));					
 						HAT->path_cost = PATH_COST; // have to fix this - adds
+						HAT->sequence_number ++; // not sure what to do - have to fix
 						memcpy(&HAT->mac, (struct ether_addr*)&eheader->ether_shost, sizeof(struct ether_addr)); // have to fix. 
 						
 						HAT->local = TRUE;  
@@ -600,8 +642,8 @@ void mtp_start() {
 						HAT->next = NULL;
 						
 						if (add_entry_HAT_LL (HAT)) {
-							printf("Source MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
-							printf("********** End Host Address Table Data ***********\n\n");
+							//printf("Source MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
+							//printf("********** End Host Address Table Data ***********\n\n");
 						
 							print_entries_HAT_LL();
 							
@@ -609,8 +651,8 @@ void mtp_start() {
 							//create a message - provide a data buffer, MAC address and cost
 							payload = (uint8_t *)calloc (1, MAX_BUFFER_SIZE);
 							int PayloadSize;
-							PayloadSize = build_HAAdvt_message(payload, HAT->mac, HAT->path_cost);
-							printf("********** Built payload of size %d ***********\n\n", PayloadSize);
+							PayloadSize = build_HAAdvt_message(payload, HAT->mac, HAT->path_cost, HAT->sequence_number);
+							printf("\n\n********** Built payload of size %d ***********\n", PayloadSize);
 
 							memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
 							int numberOfInterfaces = getActiveInterfaces(interfaceNames);
