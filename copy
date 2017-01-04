@@ -1,0 +1,57 @@
+echo "Updating in the 3 node Topology"
+sudo scp -r -i ~/.ssh/geni_rsa -P 37178 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc5.geni.it.cornell.edu:/users/rss2158/MTP/Source/
+sudo scp -r -i ~/.ssh/geni_rsa -P 37179 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc5.geni.it.cornell.edu:/users/rss2158/MTP/Source/
+sudo scp -r -i ~/.ssh/geni_rsa -P 37180 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc5.geni.it.cornell.edu:/users/rss2158/MTP/Source/
+echo "Updating in the 5 node Topology"
+sudo scp -i ~/.ssh/geni_rsa -P 33594 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 33595 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 33596 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 33597 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 33598 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+echo "Updating in the 5 node Broadcast Topology"
+sudo scp -i ~/.ssh/geni_rsa -P 38458 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 38459 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 38460 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 38461 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 38462 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 38463 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+
+echo "Updating in the 7 node Broadcast Topology"
+sudo scp -i ~/.ssh/geni_rsa -P 39226 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39227 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39228 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39229 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39227 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39228 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39229 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39226 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc1.geni.it.cornell.edu:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 39226 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.geni.it.cornell.edu:/users/rss2158/MTP/Source
+
+echo "Updating the 15 Node Broadcast Topology"
+
+
+
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc11.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32315 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc11.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc13.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc4.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc2.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc7.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc8.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc12.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc6.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc5.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc10.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc3.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc14.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc15.utahddc.geniracks.net:/users/rss2158/MTP/Source
+sudo scp -i ~/.ssh/geni_rsa -P 32314 /Users/rajeshetty/Documents/Homeworks/Capstone/MTP/Source/*  rss2158@pc1.utahddc.geniracks.net:/users/rss2158/MTP/Source
+
+
+
+
+
+
+
+
+
