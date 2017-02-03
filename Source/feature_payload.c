@@ -7,6 +7,7 @@ struct vid_addr_tuple *main_vid_tbl_head = NULL;
 struct child_pvid_tuple *cpvid_tbl_head = NULL; 
 struct local_bcast_tuple *local_bcast_head = NULL;
 struct Host_Address_tuple *HAT_head = NULL;
+struct control_ports *control_ports_head = NULL; 
 
 /*
  *   isChild() - This method checks if the input VID param is child of any VID in Main 
@@ -356,13 +357,13 @@ void print_entries_LL() {
   int tracker = MAX_MAIN_VID_TBL_PATHS;
 
   printf("\n#######Main VID Table#########\n");
-  printf("MT_VID\t\t\t\tEthname\t\t\tPath Cost\tMembership\tMAC\n");
+  printf("MT_VID\t\tEthname\t\tPath Cost\tMembership\tMAC\n");
 
   for (current = main_vid_tbl_head; current != NULL; current = current->next) {
     if (tracker <= 0) {
       break;
     } else {
-      printf("%s\t\t\t\t%s\t\t\t%d\t\t%d\t\t%s\n", current->vid_addr, current->eth_name, current->path_cost, current->membership, ether_ntoa(&current->mac) );
+      printf("%s\t\t%s\t\t%d\t\t%d\t\t%s\n", current->vid_addr, current->eth_name, current->path_cost, current->membership, ether_ntoa(&current->mac) );
       tracker--;
     }
   }
@@ -509,11 +510,11 @@ void print_entries_bkp_LL() {
   int tracker = MAX_MAIN_VID_TBL_PATHS;
 
   printf("\n#######Backup VID Table#########\n");
-  printf("MT_VID\t\t\t\tEthname\t\t\tPath Cost\tMembership\tMAC\n");
+  printf("MT_VID\t\tEthname\t\tPath Cost\tMembership\tMAC\n");
 
   for (current = main_vid_tbl_head; current != NULL; current = current->next) {
     if (tracker <= 0) {
-      printf("%s\t\t\t\t%s\t\t\t%d\t\t%d\t\t%s\n", current->vid_addr, current->eth_name, current->path_cost, current->membership, ether_ntoa(&current->mac) );
+      printf("%s\t\t%s\t\t%d\t\t%d\t\t%s\n", current->vid_addr, current->eth_name, current->path_cost, current->membership, ether_ntoa(&current->mac) );
     } else {
       tracker--;
     }
@@ -779,14 +780,7 @@ bool add_entry_lbcast_LL(struct local_bcast_tuple *node) {
   }
 }
 
-/**
- *    Find entries in the local host broadcast Table.
- *    Local Host broadcast Table,    Implemented Using linked list.
- *    Head Ptr,   *local_bcast_head
- *    @return
- *    true      If element is found.
- *    false     If element is not found.
-**/
+
 
 bool find_entry_lbcast_LL(struct local_bcast_tuple *node) {
   struct local_bcast_tuple *current = local_bcast_head;
@@ -878,25 +872,36 @@ struct local_bcast_tuple* getInstance_lbcast_LL() {
 /* NS adds code for populating Host Address Table */
 bool add_entry_HAT_LL(struct Host_Address_tuple *HAT) {
   if (HAT_head == NULL) {
-    HAT_head = HAT;
+    HAT_head = HAT;  // update local variable with the passed variable - first time this will be true
   } else {
-    if (!find_entry_HAT_LL(HAT)) {
+    if (!find_entry_HAT_LL(HAT)) {  // second time onwards this will be true
+      //printf(" In ADD HAT enrty \n  " );
       HAT->next = HAT_head;
-      HAT_head = HAT;
+      HAT_head = HAT;  // what is happening here - the entry is being added 
     }
   } 
 }
 
 bool find_entry_HAT_LL(struct Host_Address_tuple *node) {
   struct Host_Address_tuple *current = HAT_head;
+  uint8_t mac_addr [6];
+  uint8_t byte_number;
 
   if (current != NULL) {
+    //printf(" In Locating HAT enrty - first step\n  " );
     while (current != NULL) {
+      //printf(" In Locating HAT enrty - second step\n  " );
+      for (byte_number=0; byte_number< 6; byte_number++)
+      {
+        printf ("byte number =%d, in table mac octet = %d, in node mac octet = %d   \n", byte_number, current->mac.ether_addr_octet[byte_number], node->mac.ether_addr_octet[byte_number]);
+        if (current->mac.ether_addr_octet[byte_number] != node->mac.ether_addr_octet[byte_number])
+          break; 
+      }
+      if (byte_number ==6) {
 
-      if (strcmp(current->eth_name, node->eth_name) == 0) {
+      printf(" In Locating HAT enrty found a match\n  " );
         return true;
       }
-
       current = current->next;
     }
   }
@@ -905,13 +910,13 @@ bool find_entry_HAT_LL(struct Host_Address_tuple *node) {
 
 void print_entries_HAT_LL() {
   struct Host_Address_tuple *current;
-  printf("\n#######Host Address Table#########\n");
+  printf("\n###################   Host Address Table   ###############\n");
 
   for (current = HAT_head; current != NULL; current = current->next) {
-    printf("%s\n", current->eth_name);
+    printf("port name \t\t cost \t\t seq num \t\t mac address \t\t local \n");
 	printf("%s\t\t\t%d\t\t%d\t\t%s\t\t%d\n", current->eth_name, current->path_cost,  current->sequence_number, ether_ntoa(&current->mac), current->local );
   }
-  printf("\n#######End Host Address Table#########\n");
+  printf("\n###################   End Host Address Table   ###############\n");
 }
 
 int build_HAAdvt_message(uint8_t *data, struct ether_addr mac, uint8_t cost, uint8_t sequence_number) {
@@ -953,10 +958,73 @@ void print_HAAdvt_message_content(uint8_t *rx_buffer)
   mac_addr[4] = rx_buffer[21];
   mac_addr[5] = rx_buffer[22];
 
-//uint8_t recv_buffer[MAX_BUFFER_SIZE];
-//recv_buffer[0] = rx_buffer[0];
-//printf("Dest MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_dhost));
-
 printf("\nCost is %d, Sequqnce number is %d, MAC address is %s \n", (uint8_t) rx_buffer[15], (uint8_t) rx_buffer[16], ether_ntoa((struct ether_addr *) mac_addr));
 
+}
+
+/**
+*     NS - Create a table that stores the control ports
+ *    Add into the control ports Table.
+ *    Implemented Using linked list.
+ *    Head Ptr,   *local_bcast_head
+ *    @return
+ *    true      Successful Addition
+ *    false     Failure to add/ Already exists.
+**/
+bool add_entry_control_table(struct control_ports *node) {
+  if (control_ports_head == NULL) {
+    control_ports_head = node;
+  } else {
+    if (!find_entry_control_table(node)) {
+      node->next = control_ports_head;
+      control_ports_head = node;
+      print_entries_control_table ();
+    }
+  }
+}
+
+/**
+ *    Find entries in the local host broadcast Table. 
+ *    is being used for finding entries in control ports table also
+ *    Local Host broadcast Table,    Implemented Using linked list.
+ *    Head Ptr,   *local_bcast_head
+ *    @return
+ *    true      If element is found.
+ *    false     If element is not found.
+**/
+ bool find_entry_control_table(struct control_ports  *node) {
+  struct control_ports  *current = control_ports_head;
+
+  if (current != NULL) {
+
+    while (current != NULL) {
+
+      if (strcmp(current->eth_name, node->eth_name) == 0) {
+        return true;
+      }
+
+      current = current->next;
+    }
+  }
+
+  return false;
+}
+
+/**
+ *    Print Control Ports Table.
+ *    Implemented Using linked list.
+ *    Head Ptr,   *local_bcast_head
+ *    @return
+ *    void      
+**/
+
+void print_entries_control_table() {
+  struct control_ports *current;
+
+
+  printf("\n#######Control ports Table#########\n");
+
+  for (current = control_ports_head; current != NULL; current = current->next) {
+    printf("%s\n", current->eth_name);
+  }
 }

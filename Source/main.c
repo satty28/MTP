@@ -146,6 +146,7 @@ void mtp_start() {
 	// time_t, timers for checking hello time.
 	time_t time_advt_beg;
 	time_t time_advt_fin;
+	time_t time_current; // NS adds to record time of receiving frames from host
 	uint8_t *payload = NULL;
 
 	// clear the memory
@@ -272,6 +273,13 @@ void mtp_start() {
 			} else {
 				// This is an MTP frame so, incase this port is in Local host broadcast table remove it.
 				delete_entry_lbcast_LL(recvOnEtherPort); 
+				// add to control ports 
+				struct control_ports *new_node = (struct control_ports *) calloc(1, sizeof( struct control_ports));
+
+				strncpy(new_node->eth_name, recvOnEtherPort, strlen(recvOnEtherPort));
+				new_node->next = NULL; 
+				add_entry_control_table(new_node);
+				
 			}
             // recvBuffer[0] to recvBuffer[13] has 6 bytes dest MAC address, 6 bytes src MAC address, 2 bytes type
 			switch ( recvBuffer[14] ) {
@@ -499,46 +507,35 @@ void mtp_start() {
 					} 
 					break;
 				case MTP_HAAdvt_TYPE: {
-
-					printf ("Received MTP_HAAdvt_TYPE Message \n"); //MTP_HAAdvt_TYPE
-
-					//struct ether_addr src_mac, dst_mac;
-					struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); //27 Sept 2016
-					// all the information in the message is in recvBuffer
-					print_HAAdvt_message_content(recvBuffer); 
+					// this section updated on 31st OCT 2016
+					printf ("\n\nReceived MTP_HAAdvt_TYPE Message \n"); 
+					struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); 
 					uint8_t mac_addr [6];
-
   					mac_addr[0] = recvBuffer[17];
   					mac_addr[1] = recvBuffer[18];
   					mac_addr[2] = recvBuffer[19];
   					mac_addr[3] = recvBuffer[20];
   					mac_addr[4] = recvBuffer[21];
   					mac_addr[5] = recvBuffer[22];
+  					// all the information in the message is in recvBuffer - just to check
+					print_HAAdvt_message_content(recvBuffer);
 
-					strncpy(HAT->eth_name, recvOnEtherPort, strlen(recvOnEtherPort));	// record the port onwhch the control frame arrived				
-					HAT->path_cost = PATH_COST; // have to fix this - adds
-					HAT->sequence_number ++; // not sure what to do - have to fix
+					strncpy(HAT->eth_name, recvOnEtherPort, strlen(recvOnEtherPort));	// record the port on whch the control frame arrived				
+					HAT->path_cost = (uint8_t) recvBuffer [15] + 1; // have to fix this - after finding the cost at the interface
+					HAT->sequence_number = (uint8_t) recvBuffer [15]; 
+					// have to fix - the sequence number increments if the switch wishes to send a triggered update on changed information 
 				
-					memcpy(&HAT->mac, (struct ether_addr *) mac_addr, sizeof(struct ether_addr)); // have to fix. 
+					memcpy(&HAT->mac, (struct ether_addr *) mac_addr, sizeof(struct ether_addr));  
 						
-					HAT->local = TRUE;  
+					HAT->local = FALSE;  
 						
 					HAT->next = NULL;
 					
-					//memcpy(&src_mac, (struct ether_addr *)&eheader->ether_shost, sizeof(struct ether_addr)); // why are we doing this?
-					//memcpy(&dst_mac, (struct ether_addr *)&eheader->ether_dhost, sizeof(struct ether_addr));
-					//printf("Dest MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_dhost));
-					//printf("Source MAC: %s\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
-					
-					if (add_entry_HAT_LL (HAT)) {
-							//printf("Source MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
-							//printf("********** End Host Address Table after receiving a message ***********\n\n");
-						
-							//print_entries_HAT_LL();
-						
-						}
 					// Update Host Address Table 
-					// if changed - send another update 
+					if (add_entry_HAT_LL (HAT)) {
+							print_entries_HAT_LL();
+							// if changed - send another update on the control ports
+						}
 				}
 				break;
 				default:
@@ -609,13 +606,14 @@ void mtp_start() {
 			else if (strncmp(ether_ntoa((struct ether_addr *)&eheader->ether_dhost), "01:00:5e:00:00:01", 9) == 0)
 			{
 				//multicast address range is from 01:00:5e:00:00:00 to 01:00:5e:7f:ff:ff
+				// do not handle frames addressed to multicast destinations 
 				printf("Received on port %s a multicast frame \n", recvOnEtherPort); 
 				printf("Destination MAC: %s\n", ether_ntoa((struct ether_addr *)&eheader->ether_dhost));
 				break; 
 
 			}
 
-			else {
+			else { // unicast frame 
 				
 				printf("\n\nReceived a non-Bcast frame\n");
 				printf("Source MAC: %s\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
@@ -624,36 +622,28 @@ void mtp_start() {
 				printf("Received on port %s\n", recvOnEtherPort); 
 				
 				struct local_bcast_tuple* current =  getInstance_lbcast_LL(); 
-				
+				struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); 
 				for (; current != NULL; current = current->next) {
 					// this a port from where the frame was received
-					struct Host_Address_tuple *HAT = (struct Host_Address_tuple *) calloc (1, sizeof (struct Host_Address_tuple)); 
-					
 					if (strcmp(current->eth_name, recvOnEtherPort) == 0) {
-						//printf("********** Host Address Table Data ***********\n");
-						//printf("Frame from host came on port %s\n", current->eth_name);
 						strncpy(HAT->eth_name, current->eth_name, strlen(current->eth_name));					
-						HAT->path_cost = PATH_COST; // have to fix this - adds
-						HAT->sequence_number ++; // not sure what to do - have to fix
-						memcpy(&HAT->mac, (struct ether_addr*)&eheader->ether_shost, sizeof(struct ether_addr)); // have to fix. 
-						
+						HAT->path_cost = PATH_COST; // starts with path cost 0 as this is the local port 
+						HAT->sequence_number = SEQUENCE_NUMBER; // starts with sequence number 0 as this is the local port 
+						memcpy(&HAT->mac, (struct ether_addr*)&eheader->ether_shost, sizeof(struct ether_addr)); 
 						HAT->local = TRUE;  
-						
+						// #####NS include current time 
+						HAT->time(&current_time);
 						HAT->next = NULL;
 						
-						if (add_entry_HAT_LL (HAT)) {
-							//printf("Source MAC: %s\n\n", ether_ntoa((struct ether_addr *) &eheader->ether_shost));
-							//printf("********** End Host Address Table Data ***********\n\n");
+
 						
+						if (add_entry_HAT_LL (HAT)) {
 							print_entries_HAT_LL();
-							
-							// send a HAT update on all ports except port of reception
-							//create a message - provide a data buffer, MAC address and cost
+
 							payload = (uint8_t *)calloc (1, MAX_BUFFER_SIZE);
 							int PayloadSize;
 							PayloadSize = build_HAAdvt_message(payload, HAT->mac, HAT->path_cost, HAT->sequence_number);
 							printf("\n\n********** Built payload of size %d ***********\n", PayloadSize);
-
 							memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
 							int numberOfInterfaces = getActiveInterfaces(interfaceNames);
 							printf("********** Number of Interfaces %d ***********\n\n", numberOfInterfaces);
@@ -661,6 +651,8 @@ void mtp_start() {
 				            
 							for (; i < numberOfInterfaces; i++){
 								if( strcmp(interfaceNames[i], recvOnEtherPort) != 0 ){
+									// there could be more than this rceived port that are local - should get all local ports
+									// and send control message only on the control ports 
 									printf("Sending HAAdvt on port %s\n", interfaceNames[i]);
 									ctrlSend( interfaceNames[i], payload, PayloadSize );															
 								} 

@@ -90,6 +90,12 @@ struct local_bcast_tuple {
   struct local_bcast_tuple *next;
 };
 
+/* NS adds - control ports table */
+struct control_ports {
+  char eth_name[ETH_ADDR_LEN];          //  port Name
+  struct control_ports *next;
+};
+
 /* NS Adds - Host Address Table */
 struct Host_Address_tuple {
   char eth_name[ETH_ADDR_LEN];          // Port of access for host
@@ -97,6 +103,7 @@ struct Host_Address_tuple {
   struct ether_addr mac;   // MAC address of host 
   bool local;  // if the host is local this flag will be set to true - else false
   uint8_t sequence_number; // 26 Sept 2016
+  time_t time_current; 
   struct Host_Address_tuple *next;
 };
 
@@ -143,6 +150,12 @@ bool find_entry_HAT_LL(struct Host_Address_tuple *);
 void print_entries_HAT_LL();
 int build_HAAdvt_message(uint8_t *, struct ether_addr, uint8_t, uint8_t);
 void print_HAAdvt_message_content(uint8_t *);
+
+/* function prototypes for control ports table */
+bool add_entry_control_table(struct control_ports *);
+bool find_entry_control_table(struct control_ports  *);
+void print_entries_control_table(); 
+
 
 /* check Failures */
 int checkForFailures(char **);
