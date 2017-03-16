@@ -37,6 +37,7 @@
 #define ETH_MTP_CTRL    0x8850
 #define MAX_VID_LIST    20
 #define CTRL_IP		"172"
+#define BUFSIZE		1000
 
 /* Function Prototypes */
 void mtp_start();
@@ -66,7 +67,7 @@ int main (int argc, char** argv) {
 
 
 	// Check number of Arguments.
-	if (argc < 3) {
+	if (argc < 4) {
         printf("Usage: sudo bin/mtpd <0/1> <1/2> <X> VID Value\n");
 		printf("Error: Node spec or ROOT MTS ID missing. Format ./main <non MTS/root MTS> <ROOT MTS ID>\n");
 		printf("Error: 0 for non MTS, 1 for root MTS\n");
@@ -79,10 +80,10 @@ int main (int argc, char** argv) {
 		isRoot = true;
 		printf("This node is root MTS\n");
         if (atoi(argv[2]) == 1) {
-            printf("Pirmary Root for the application");
+            printf("Pirmary Root for the application\n");
             rootPriority = 1;
         }else{
-            printf("Secondary Root for the application");
+            printf("Secondary Root for the application\n");
 			isSecondaryRoot = true;
             rootPriority = 1;
         }
@@ -90,7 +91,27 @@ int main (int argc, char** argv) {
 	else printf("This node is a non-root MTS\n");
     /* Opening the file for writing the code */
     //openLogsFile();
+/* block to get port numbers from a file */
+        int a = 0;
+        int index;        
+        //int vlanport[24];
+        int *vlanport;
+        vlanport = malloc(sizeof(int));
+        FILE *fp = fopen(argv[4], "r");
+        char buff[BUFSIZE];
+        while(fgets(buff, BUFSIZE - 1, fp) != NULL)
+        {
+                printf ("%s\n", buff);
+                vlanport[a] = atoi(buff);
+                a++;
+                
+        }
+        fclose(fp);
+        for(index = 0; index < (sizeof(vlanport) / sizeof(vlanport[0])); index++) {
+                printf ("printing the first port from array: %d\n", vlanport[index]);
+        }
 
+/* end of block to get port numbers from a file */
 
 	// Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
 	interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
