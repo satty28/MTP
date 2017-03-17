@@ -91,36 +91,63 @@ int main (int argc, char** argv) {
 	else printf("This node is a non-root MTS\n");
     /* Opening the file for writing the code */
     //openLogsFile();
-/* block to get port numbers from a file */
+/* block to get port numbers from a file 
         int a = 0;
         int index;        
         //int vlanport[24];
-        //int *vlanport;
-		char *vlanport;
-        //vlanport = malloc(sizeof(int));
-		vlanport = malloc(sizeof(char));
+        int *vlanport;
+	//char vlanport[24];
+        vlanport = malloc(sizeof(int));
+	//vlanport = malloc(sizeof(char));
         FILE *fp = fopen(argv[4], "r");
         char buff[BUFSIZE];
         while(fgets(buff, BUFSIZE - 1, fp) != NULL)
         {
                 printf ("%s\n", buff);
-                //vlanport[a] = atoi(buff);
-				vlanport[a] = buff;
+                vlanport[a] = atoi(buff);
+		//vlanport[a] = buff;
                 a++;
                 
         }
         fclose(fp);
         for(index = 0; index < (sizeof(vlanport) / sizeof(vlanport[0])); index++) {
-                printf ("printing the first port from array: %s\n", vlanport[index]);
+        	printf ("printing the first port from array: %d\n", vlanport[index]);
+		//puts("\nprinting the first port from array:");
+		//puts(vlanport[index]);
         }
 
-/* end of block to get port numbers from a file */
+ end of block to get port numbers from a file */
+/* Reading char from file and storing it array */
+    	int a=0;
+    	int numProgs=0;
+    	char* vlanport[50];
+    	char line[50];
+	int j;
+    	FILE *file;
+    	file = fopen(argv[4], "r");
 
+    	while(fgets(line, sizeof line, file)!=NULL) {
+        //check to be sure reading correctly
+       	printf("%s", line);
+        //add each filename into array of programs
+        vlanport[a]=strdup(line); 
+        a++;
+        //count number of programs in file
+        numProgs++;
+    	}
+
+    	fclose(file);
+    	//check to be sure going into array correctly 
+    	for (j=0 ; j<numProgs; j++) {
+        printf("\nPrinting Port from File: %s", vlanport[j]);
+    	}	
+	printf("\nstep1");
+/* End of Reading char from file and storing it array */
 	// Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
 	interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
 	memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
 	int numberOfInterfaces = getActiveInterfaces(interfaceNames);
-    //printf("\nNumber of Interfaces\n");
+    printf("\nNumber of Interfaces\n");
     gethostname(sysname, 1024);
 
 	int i = 0;
