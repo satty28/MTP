@@ -64,6 +64,12 @@ struct timeval rootCStart;
 /* Entry point to the program */
 int main (int argc, char** argv) {	
 	char **interfaceNames;
+/*temp */	
+	int i = 0;
+        interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
+        memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
+        int numberOfInterfaces = getActiveInterfaces(interfaceNames);
+/*temp */
 	printf ("printing the no of arguments: %d\n", argc);
 	// Check number of Arguments.
 	if (argc < 4) {
@@ -119,6 +125,7 @@ int main (int argc, char** argv) {
 /* Reading char from file and storing it array */
     	int a=0;
     	int numProgs=0;
+//	int i=0;
     	char* vlanport[50];
     	char line[50];
 	int j;
@@ -144,17 +151,38 @@ int main (int argc, char** argv) {
     	}
 	
 	printf ("No. of VLANports: %d\n", numberofVports); 
-	}	
+	
 
 /* End of Reading char from file and storing it array */
 	printf("\nstep1");
 	// Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
+	
+        for (; i < numberofVports; i++) {
+                // Allocate memory and intialize(calloc).
+                struct local_bcast_tuple *new_node = (struct local_bcast_tuple*) calloc (1, sizeof(struct local_bcast_tuple));
+
+                // Fill
+                strncpy(new_node->eth_name, vlanport[i], strlen(vlanport[i]));
+        puts("Printing eth_name of interfaces");
+        puts(new_node->eth_name);
+                new_node->next = NULL;
+                add_entry_lbcast_LL(new_node); //returns bool but is not catched here
+
+        }
+	}
+	else if (argc == 4){
+        printf("\nstep1");
+        // Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
+/*temp block */        
 	interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
-	memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
-	int numberOfInterfaces = getActiveInterfaces(interfaceNames);
-   	printf("\nNumber of Interfaces: %d\n", numberOfInterfaces);
-    	gethostname(sysname, 1024);
-	int i = 0;
+        memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
+        int numberOfInterfaces = getActiveInterfaces(interfaceNames);
+/*temp block*/
+        printf("\nNumber of Interfaces: %d\n", numberOfInterfaces);
+        gethostname(sysname, 1024);
+
+
+	//int i = 0;
 	for (; i < numberOfInterfaces; i++) {
 		// Allocate memory and intialize(calloc).
 		struct local_bcast_tuple *new_node = (struct local_bcast_tuple*) calloc (1, sizeof(struct local_bcast_tuple));
@@ -167,7 +195,7 @@ int main (int argc, char** argv) {
 		add_entry_lbcast_LL(new_node); //returns bool but is not catched here
 
 	}
-
+	}
 
 	// If Node is Root MTS
 	if (isRoot) {
