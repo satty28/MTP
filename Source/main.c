@@ -64,8 +64,7 @@ struct timeval rootCStart;
 /* Entry point to the program */
 int main (int argc, char** argv) {	
 	char **interfaceNames;
-
-
+	printf ("printing the no of arguments: %d\n", argc);
 	// Check number of Arguments.
 	if (argc < 4) {
         printf("Usage: sudo bin/mtpd <0/1> <1/2> <X> VID Value\n");
@@ -74,7 +73,6 @@ int main (int argc, char** argv) {
         printf("Error: 1 for Primary Root MTS, 2 for secondary root MTS\n");
 		exit(1);
 	}
-
 	// Check if Node is Root MTS or Non MTS
 	if (atoi(argv[1]) >= 1) {
 		isRoot = true;
@@ -117,13 +115,15 @@ int main (int argc, char** argv) {
         }
 
  end of block to get port numbers from a file */
+	if (argc == 5) {
 /* Reading char from file and storing it array */
     	int a=0;
     	int numProgs=0;
     	char* vlanport[50];
     	char line[50];
 	int j;
-    	FILE *file;
+    	int numberofVports;
+	FILE *file;
     	file = fopen(argv[4], "r");
 
     	while(fgets(line, sizeof line, file)!=NULL) {
@@ -140,16 +140,20 @@ int main (int argc, char** argv) {
     	//check to be sure going into array correctly 
     	for (j=0 ; j<numProgs; j++) {
         printf("\nPrinting Port from File: %s", vlanport[j]);
-    	}	
-	printf("\nstep1");
+	numberofVports = j+1;
+    	}
+	
+	printf ("No. of VLANports: %d\n", numberofVports); 
+	}	
+
 /* End of Reading char from file and storing it array */
+	printf("\nstep1");
 	// Populate local host broadcast table, intially we mark all ports as host ports, if we get a MTP CTRL frame from any port we remove it.
 	interfaceNames = (char**) calloc (MAX_INTERFACES*MAX_INTERFACES, sizeof(char));
 	memset(interfaceNames, '\0', sizeof(char) * MAX_INTERFACES * MAX_INTERFACES);
 	int numberOfInterfaces = getActiveInterfaces(interfaceNames);
-    printf("\nNumber of Interfaces\n");
-    gethostname(sysname, 1024);
-
+   	printf("\nNumber of Interfaces: %d\n", numberOfInterfaces);
+    	gethostname(sysname, 1024);
 	int i = 0;
 	for (; i < numberOfInterfaces; i++) {
 		// Allocate memory and intialize(calloc).
