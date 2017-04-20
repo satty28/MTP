@@ -4,7 +4,8 @@
  */
 
 #include "mtp_send.h"
-
+#include <fcntl.h> // for open
+#include <unistd.h> // for close
 
 int ctrlSend(char *etherPort, uint8_t *inPayload, int payloadLen) {
 	int frame_Size = -1;

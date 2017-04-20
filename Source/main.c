@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 
+#include <sys/time.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/if_ether.h>
@@ -38,7 +39,6 @@
 #define MAX_VID_LIST    20
 #define CTRL_IP		"172"
 #define BUFSIZE		1000
-
 /* Function Prototypes */
 void mtp_start();
 int getActiveInterfaces(char **);
